@@ -1,0 +1,3 @@
+SERVER = {
+	'workers': 2
+}

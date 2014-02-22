@@ -5,11 +5,12 @@ Genie in a Bottle Framework, it's a set of plugins on top of Bottle (Python Web 
 
 ### TODO
 
-* Config plugin
-* JSON response API plugin
-* REST controller plugin
+* Config loader
+* Application loader
+* JSON response API
+* REST controller
 * Websocket plugin
-* Static and stream files plugin
+* Static and stream files
 * Peewee ORM plugin (PostgreSQL, MySQL, SQLite)
 * MongoDB plugin
 * Redis plugin
