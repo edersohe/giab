@@ -11,7 +11,7 @@ setup(
     long_description = ('Genie in a Bottle Framework,'
     	               ' it\'s a set of plugins on top of Bottle'
     	               ' (Python Web Framework) and easy deploy with'
-    	               ' gunicorn+gevent')
+    	               ' gunicorn+gevent'),
     scripts = ['giab'],
     install_requires = requirements,
     license = 'MIT',
