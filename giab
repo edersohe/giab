@@ -64,8 +64,7 @@ try:
         logging.warning('Genie config ROUTES is empty', extra={'stack': True})
 except ImportError:
     logging.error('Doesn\'t exist Genie config file', exc_info=True)
-    raise ImportError
-
+    sys.exit(1)
 
 if __name__ == '__main__':
     app = create_app(SERVER_CONFIG.pop('prefix'), ROUTES_CONFIG)
