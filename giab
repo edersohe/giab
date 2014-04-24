@@ -66,6 +66,19 @@ except ImportError:
     logging.error('Doesn\'t exist Genie config file', exc_info=True)
     sys.exit(1)
 
+
+def stream_file(name, content):
+    content_type = 'application/octet-stream'
+    content_disposition = 'attachment; filename=%s;' % name
+    bottle.response.add_header('Content-Type', content_type)
+    bottle.response.add_header('Content-Disposition', content_disposition)
+    bottle.response.add_header('Content-Size', content.length)
+    return content
+
+
+bottle.stream_file = stream_file
+
+
 if __name__ == '__main__':
     app = create_app(SERVER_CONFIG.pop('prefix'), ROUTES_CONFIG)
     bottle.run(app=app, **SERVER_CONFIG)
