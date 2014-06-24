@@ -1,3 +1,5 @@
+simplejson==3.5.2
+wsaccel==0.6.2
 gevent-websocket==0.9.3
 gunicorn==19.0
 bottle==0.12.7

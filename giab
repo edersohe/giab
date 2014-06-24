@@ -90,9 +90,19 @@ def websocket(callback):
 bottle.ext.websocket = websocket
 
 
+
+
+class Bottle(bottle.Bottle):
+    def ws(self, path, **options):
+        if 'apply' not in options:
+            options['apply'] = [bottle.ext.websocket]
         else:
+            options['apply'].append(bottle.ext.websocket)
+        return self.route(path, 'GET', **options)
 
 
+bottle.Bottle = Bottle
+bottle.ws = bottle.make_default_app_wrapper('ws')
 
 
 if __name__ == '__main__':
