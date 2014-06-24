@@ -6,12 +6,13 @@ gevent.monkey.patch_all()
 
 import bottle
 import sys
-import os
-import logging
 import multiprocessing
+import os
+from bottle import template, tob, ERROR_PAGE_TEMPLATE
 
 
-sys.path.insert(0, os.getcwd())
+def get_db_clients(dsns):
+    return dsns
 
 
 def get_server_opts(override):
@@ -53,18 +54,18 @@ def create_app(prefix, routes):
     return root
 
 
+sys.path.insert(0, os.getcwd())
+
+
 try:
     import config
-    SERVER_CONFIG = get_server_opts(getattr(config, 'SERVER', {}))
-    if not isinstance(SERVER_CONFIG, dict) or len(SERVER_CONFIG) == 0:
-        logging.info('Genie server start with default parameters')
-
-    ROUTES_CONFIG = getattr(config, 'ROUTES', {})
-    if not isinstance(ROUTES_CONFIG, dict) or len(ROUTES_CONFIG) == 0:
-        logging.warning('Genie config ROUTES is empty', extra={'stack': True})
+    bottle.db = get_db_clients(getattr(config, 'DATABASES', {}))
+    SERVER_OPTS = get_server_opts(getattr(config, 'SERVER', {}))
+    ROUTES = getattr(config, 'ROUTES', {})
 except ImportError:
-    logging.error('Doesn\'t exist Genie config file', exc_info=True)
-    sys.exit(1)
+    bottle.db = get_db_clients({})
+    SERVER_OPTS = get_server_opts({})
+    ROUTES = {}
 
 
 def stream_file(name, content):
@@ -95,5 +96,5 @@ bottle.ext.websocket = websocket
 
 
 if __name__ == '__main__':
-    app = create_app(SERVER_CONFIG.pop('prefix'), ROUTES_CONFIG)
-    bottle.run(app=app, **SERVER_CONFIG)
+    app = create_app(SERVER_OPTS.pop('prefix'), ROUTES)
+    bottle.run(app=app, **SERVER_OPTS)
