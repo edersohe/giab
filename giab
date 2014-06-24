@@ -139,7 +139,7 @@ class JSONPlugin(object):
             output = callback(*a, **ka)
             if bottle.request.accept('json'):
                 response_object = self.get_response_object(0)
-                response_object['data'] = output
+                response_object['response'] = output
                 bottle.response.content_type = 'application/json'
                 return self.dumps(response_object)
             return output
@@ -149,9 +149,7 @@ class JSONPlugin(object):
         ''' Helper for building the json object '''
         if status in self.statuses:
             json_response = {
-                'status': self.statuses.get(status),
-                'status_code': status,
-                'data': None,
+                'response': None,
                 'error': None
             }
             return json_response
@@ -163,7 +161,7 @@ class JSONPlugin(object):
             ''' Monkey patch method for json formatting error responses '''
             response_object = self.get_response_object(1)
             response_object['error'] = {
-                'status_code': error.status_code,
+                'code': error.status_code,
                 'status': error.status_line,
                 'message': error.body,
             }
