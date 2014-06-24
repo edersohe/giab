@@ -86,6 +86,94 @@ def websocket(callback):
 bottle.ext.websocket = websocket
 
 
+class JSONPlugin(object):
+    ''' Bottle plugin which encapsulates results and error in a json object.
+    Intended for instances where you want to use Bottle as an api server. '''
+
+    name = 'json'
+    api = 2
+
+    statuses = {
+        0: 'success',
+        1: 'error',
+        2: 'internal failure',
+    }
+
+    def __init__(self, ensure_ascii=False, **kwargs):
+
+        try:
+            from bson.json_util import dumps
+        except ImportError:
+            from simplejson import dumps
+        except ImportError:
+            from json import dumps
+
+        self.dumps = lambda obj: dumps(obj, ensure_ascii, **kwargs)
+
+    def accept(self, content_type):
+        header_accept = bottle.request.headers.get('Accept', '')
+        if content_type in header_accept:
+            return True
+        elif '*/*' in header_accept:
+            return True
+        return False
+
+    def setup(self, app):
+        self.app = app
+        ''' Handle plugin install '''
+        setattr(self.app, 'default_error_handler', self.custom_error_handler)
+
+    def apply(self, callback, route):
+        ''' Handle route callbacks '''
+        if not self.dumps:
+            return callback
+
+        def wrapper(*a, **ka):
+            ''' Monkey patch method accept in thread_local request '''
+            setattr(bottle.request, 'accept', getattr(self, 'accept'))
+            ''' Encapsulate the result in json '''
+            output = callback(*a, **ka)
+            if bottle.request.accept('json'):
+                response_object = self.get_response_object(0)
+                response_object['data'] = output
+                bottle.response.content_type = 'application/json'
+                return self.dumps(response_object)
+            return output
+        return wrapper
+
+    def get_response_object(self, status):
+        ''' Helper for building the json object '''
+        if status in self.statuses:
+            json_response = {
+                'status': self.statuses.get(status),
+                'status_code': status,
+                'data': None,
+                'error': None
+            }
+            return json_response
+        else:
+            self.get_response_object(2)
+
+    def custom_error_handler(self, error):
+        if self.accept('json'):
+            ''' Monkey patch method for json formatting error responses '''
+            response_object = self.get_response_object(1)
+            response_object['error'] = {
+                'status_code': error.status_code,
+                'status': error.status_line,
+                'message': error.body,
+            }
+            if bottle.DEBUG and error.traceback:
+                response_object['error']['debug'] = {
+                    'exception': repr(error.exception),
+                    'traceback': repr(error.traceback),
+                }
+            bottle.response.content_type = 'application/json'
+            return self.dumps(response_object)
+        return tob(template(ERROR_PAGE_TEMPLATE, e=error))
+
+
+bottle.JSONPlugin = JSONPlugin
 
 
 class Bottle(bottle.Bottle):
