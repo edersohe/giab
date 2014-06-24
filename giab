@@ -104,7 +104,37 @@ class Bottle(bottle.Bottle):
         return self.route(prefix + '/<path:path>', 'GET', **options)
 
 
+class Resource(object):
 
+    def __init__(self, app, pk='[a-f0-9]+', **kwargs):
+
+        app.get('/', callback=self.index)
+        app.post('/', callback=self.create)
+        app.get('/<pk:re:%s>' % pk, callback=self.read)
+        app.put('/<pk:re:%s>' % pk, callback=self.update)
+        app.delete('/<pk:re:%s>' % pk, callback=self.delete)
+
+        for k, v in kwargs.iteritems():
+            if k not in self.__dict__:
+                setattr(self, k, v)
+
+    def index(self):
+        return bottle.HTTPError(404)
+
+    def create(self):
+        return bottle.HTTPError(404)
+
+    def read(self, pk):
+        return bottle.HTTPError(404)
+
+    def update(self, pk):
+        return bottle.HTTPError(404)
+
+    def delete(self, pk):
+        return bottle.HTTPError(404)
+
+
+bottle.Resource = Resource
 bottle.Bottle = Bottle
 bottle.ws = bottle.make_default_app_wrapper('ws')
 bottle.public = bottle.make_default_app_wrapper('public')

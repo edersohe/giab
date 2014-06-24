@@ -51,7 +51,7 @@ Genie in a Bottle Framework, it's a set of wrappers and plugins on top of Bottle
 - [x] Config loader
 - [x] Application loader
 * JSON response API
-* REST controller
+- [x] Resource CRUD Actions Controller
 - [x] Support for Websocket
 - [x] Stream content like file
 - [ ] Peewee ORM plugin (PostgreSQL, MySQL, SQLite)
