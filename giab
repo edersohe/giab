@@ -89,16 +89,9 @@ def websocket(callback):
 bottle.ext.websocket = websocket
 
 
-def log_request(self):
-    log = self.server.log
-    if log:
-        if hasattr(log, "info"):
-            log.info(self.format_request() + '\n')
         else:
-            log.write(self.format_request() + '\n')
 
 
-gevent.pywsgi.WSGIHandler.log_request = log_request
 
 
 if __name__ == '__main__':
