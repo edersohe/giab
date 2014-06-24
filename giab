@@ -39,12 +39,8 @@ def create_app(prefix, routes):
 
     root_prefix = ('', None, '/')
 
-    for key, value in routes.iteritems():
-        aux = bottle.load(value).app
-        if key in root_prefix:
-            app.merge(aux.routes)
-        else:
-            app.mount(key, aux)
+    for key in routes:
+        app.mount('/' + key, bottle.load(key).app)
 
     if prefix in root_prefix:
         root.merge(app.routes)
@@ -100,9 +96,18 @@ class Bottle(bottle.Bottle):
             options['apply'].append(bottle.ext.websocket)
         return self.route(path, 'GET', **options)
 
+    def public(self, prefix, root='./public', **options):
+        if 'callback' not in options:
+            callback = lambda path: bottle.static_file(path, root=root)
+            options['callback'] = callback
+        prefix = '' if prefix == '/' else prefix
+        return self.route(prefix + '/<path:path>', 'GET', **options)
+
+
 
 bottle.Bottle = Bottle
 bottle.ws = bottle.make_default_app_wrapper('ws')
+bottle.public = bottle.make_default_app_wrapper('public')
 
 
 if __name__ == '__main__':
