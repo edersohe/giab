@@ -112,10 +112,14 @@ class JSONPlugin(object):
 
     def accept(self, content_type):
         header_accept = bottle.request.headers.get('Accept', '')
-        if content_type in header_accept:
-            return True
-        elif '*/*' in header_accept:
-            return True
+
+        if isinstance(content_type, basestring):
+            if content_type in header_accept:
+                return True
+        elif isinstance(content_type, (list, tuple)):
+            for ct in content_type:
+                if ct in header_accept:
+                    return True
         return False
 
     def setup(self, app):
