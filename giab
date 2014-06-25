@@ -15,11 +15,16 @@ def get_db_clients(dsns):
     return dsns
 
 
-def custom_status_lines(custom_codes):
-    status_lines = {}
-    for k, v in custom_codes.items():
-        status_lines[k] = '%d %s' % (k, v)
-    return status_lines
+def add_status_code(status_codes):
+    for k, v in status_codes.items():
+        if k not in bottle.HTTP_CODES and k >= 600 and k <= 999:
+            bottle.HTTP_CODES.update({k: v})
+            bottle._HTTP_STATUS_LINES.update({k: '%d %s' % (k, v)})
+        else:
+            raise Exception('status %d is out of range or alredy exist' % k)
+
+
+bottle.add_status_code = add_status_code
 
 
 def get_server_opts(override):
@@ -66,17 +71,14 @@ try:
     SERVER_OPTS = get_server_opts(getattr(config, 'SERVER', {}))
     ROUTES = getattr(config, 'ROUTES', {})
     CUSTOM_CODES = getattr(config, 'CUSTOM_CODES', {})
-    CUSTOM_STATUS_LINES = custom_status_lines(CUSTOM_CODES)
 except ImportError:
     bottle.db = get_db_clients({})
     SERVER_OPTS = get_server_opts({})
     ROUTES = {}
     CUSTOM_CODES = {}
-    CUSTOM_STATUS_LINES = {}
 
 
-bottle.HTTP_CODES.update(CUSTOM_CODES)
-bottle._HTTP_STATUS_LINES.update(CUSTOM_STATUS_LINES)
+bottle.add_status_code(CUSTOM_CODES)
 
 
 def stream_file(name, content):
@@ -147,8 +149,12 @@ class JSONPlugin(object):
             ''' Encapsulate the result in json '''
             output = callback(*a, **ka)
             if bottle.request.accept('json'):
+                if bottle.response.status_code in bottle.HTTP_CODES:
+                    status = bottle.HTTP_CODES[bottle.response.status_code]
+                else:
+                    status = 'Unknow'
                 response_object = {
-                    'status': bottle.HTTP_CODES[bottle.response.status_code],
+                    'status': status,
                     'code': bottle.response.status_code,
                     'response': output,
                     'error': None
