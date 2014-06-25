@@ -15,6 +15,13 @@ def get_db_clients(dsns):
     return dsns
 
 
+def custom_status_lines(custom_codes):
+    status_lines = {}
+    for k, v in custom_codes.items():
+        status_lines[k] = '%d %s' % (k, v)
+    return status_lines
+
+
 def get_server_opts(override):
     worker_class = 'geventwebsocket.gunicorn.workers.GeventWebSocketWorker'
     default = bottle.ConfigDict()
@@ -58,10 +65,18 @@ try:
     bottle.db = get_db_clients(getattr(config, 'DATABASES', {}))
     SERVER_OPTS = get_server_opts(getattr(config, 'SERVER', {}))
     ROUTES = getattr(config, 'ROUTES', {})
+    CUSTOM_CODES = getattr(config, 'CUSTOM_CODES', {})
+    CUSTOM_STATUS_LINES = custom_status_lines(CUSTOM_CODES)
 except ImportError:
     bottle.db = get_db_clients({})
     SERVER_OPTS = get_server_opts({})
     ROUTES = {}
+    CUSTOM_CODES = {}
+    CUSTOM_STATUS_LINES = {}
+
+
+bottle.HTTP_CODES.update(CUSTOM_CODES)
+bottle._HTTP_STATUS_LINES.update(CUSTOM_STATUS_LINES)
 
 
 def stream_file(name, content):
@@ -92,12 +107,6 @@ class JSONPlugin(object):
 
     name = 'json'
     api = 2
-
-    statuses = {
-        0: 'success',
-        1: 'error',
-        2: 'internal failure',
-    }
 
     def __init__(self, ensure_ascii=False, **kwargs):
 
@@ -138,35 +147,28 @@ class JSONPlugin(object):
             ''' Encapsulate the result in json '''
             output = callback(*a, **ka)
             if bottle.request.accept('json'):
-                response_object = self.get_response_object(0)
-                response_object['response'] = output
+                response_object = {
+                    'status': bottle.HTTP_CODES[bottle.response.status_code],
+                    'code': bottle.response.status_code,
+                    'response': output,
+                    'error': None
+                }
                 bottle.response.content_type = 'application/json'
                 return self.dumps(response_object)
             return output
         return wrapper
 
-    def get_response_object(self, status):
-        ''' Helper for building the json object '''
-        if status in self.statuses:
-            json_response = {
-                'response': None,
-                'error': None
-            }
-            return json_response
-        else:
-            self.get_response_object(2)
-
     def custom_error_handler(self, error):
         if self.accept('json'):
             ''' Monkey patch method for json formatting error responses '''
-            response_object = self.get_response_object(1)
-            response_object['error'] = {
+            response_object = {
                 'code': error.status_code,
-                'status': error.status_line,
-                'message': error.body,
+                'status': error.body,
+                'response': None,
+                'error': True
             }
             if bottle.DEBUG and error.traceback:
-                response_object['error']['debug'] = {
+                response_object['debug'] = {
                     'exception': repr(error.exception),
                     'traceback': repr(error.traceback),
                 }
