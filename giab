@@ -17,7 +17,7 @@ def get_db_clients(dsns):
 
 def add_status_code(status_codes):
     for k, v in status_codes.items():
-        if k not in bottle.HTTP_CODES and k >= 600 and k <= 999:
+        if k not in bottle.HTTP_CODES and (600 <= k <= 999):
             bottle.HTTP_CODES.update({k: v})
             bottle._HTTP_STATUS_LINES.update({k: '%d %s' % (k, v)})
         else:
@@ -66,12 +66,13 @@ sys.path.insert(0, os.getcwd())
 
 
 try:
-    import config
+    from . import config
     bottle.db = get_db_clients(getattr(config, 'DATABASES', {}))
     SERVER_OPTS = get_server_opts(getattr(config, 'SERVER', {}))
     ROUTES = getattr(config, 'ROUTES', {})
     CUSTOM_CODES = getattr(config, 'CUSTOM_CODES', {})
 except ImportError:
+    config = None
     bottle.db = get_db_clients({})
     SERVER_OPTS = get_server_opts({})
     ROUTES = {}
