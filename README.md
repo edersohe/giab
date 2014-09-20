@@ -46,7 +46,7 @@ Genie in a Bottle Framework, it's a set of wrappers and plugins on top of Bottle
 	giab
 
 
-## TODO
+## Core TODO 
 
 - [x] Config loader
 - [x] Application loader
@@ -54,10 +54,13 @@ Genie in a Bottle Framework, it's a set of wrappers and plugins on top of Bottle
 - [x] Resource CRUD Actions Controller
 - [x] Support for Websocket
 - [x] Stream content like file
+- [x] Gunicorn + gevent runner
+- [ ] Tests
+
+## Plugins TODO
+
 - [ ] Peewee ORM plugin (PostgreSQL, MySQL, SQLite)
 - [ ] MongoDB plugin
 - [ ] Redis plugin
 - [ ] Redis Queue plugin
-- [x] Gunicorn + gevent runner
 - [ ] Cassandra plugin
-- [ ] Add Tests
