@@ -52,7 +52,24 @@ def create_app(prefix, routes):
     root_prefix = ('', None, '/')
 
     for key in routes:
-        app.mount('/' + key, bottle.load(key).app)
+        mod = bottle.load(key)
+
+        if 'index' in mod.__dict__:
+            mod.app.route('/', 'GET', callback=mod.index)
+
+        if 'create' in mod.__dict__:
+            mod.app.route('/', 'POST', callback=mod.create)
+
+        if 'read' in mod.__dict__:
+            mod.app.route('/<pk:re:[0-9]+>', 'GET', callback=mod.read)
+
+        if 'update' in mod.__dict__:
+            mod.app.route('/<pk:re:[0-9]+>', 'PUT', callback=mod.update)
+
+        if 'destroy' in mod.__dict__:
+            mod.app.route('/<pk:re:[0-9]+>', 'DELETE', callback=mod.destroy)
+
+        app.mount('/' + key, mod.app)
 
     if prefix in root_prefix:
         root.merge(app.routes)
@@ -202,41 +219,30 @@ class Bottle(bottle.Bottle):
         prefix = '' if prefix == '/' else prefix
         return self.route(prefix + '/<path:path>', 'GET', **options)
 
-
-class Resource(object):
-
-    def __init__(self, app, pk='[a-f0-9]+', **kwargs):
-
-        app.get('/', callback=self.index)
-        app.post('/', callback=self.create)
-        app.get('/<pk:re:%s>' % pk, callback=self.read)
-        app.put('/<pk:re:%s>' % pk, callback=self.update)
-        app.delete('/<pk:re:%s>' % pk, callback=self.delete)
-
-        for k, v in kwargs.iteritems():
-            if k not in self.__dict__:
-                setattr(self, k, v)
-
-    def index(self):
-        return bottle.HTTPError(404)
-
-    def create(self):
-        return bottle.HTTPError(404)
-
-    def read(self, pk):
-        return bottle.HTTPError(404)
-
-    def update(self, pk):
-        return bottle.HTTPError(404)
-
-    def delete(self, pk):
-        return bottle.HTTPError(404)
+    # def index(self, **options):
+    #     return self.route('/', 'GET', **options)
+    #
+    # def create(self, **options):
+    #     return self.route('/', 'POST', **options)
+    #
+    # def read(self, pk='[0-9]+', **options):
+    #     return self.route('/<pk:re:%s>' % pk, 'GET', **options)
+    #
+    # def update(self, pk='[0-9]+', **options):
+    #     return self.route('/<pk:re:%s>' % pk, 'PUT', **options)
+    #
+    # def destroy(self, pk='[0-9]+', **options):
+    #     return self.route('/<pk:re:%s>' % pk, 'DELETE', **options)
 
 
-bottle.Resource = Resource
 bottle.Bottle = Bottle
 bottle.ws = bottle.make_default_app_wrapper('ws')
 bottle.public = bottle.make_default_app_wrapper('public')
+# bottle.index = bottle.make_default_app_wrapper('index')
+# bottle.create = bottle.make_default_app_wrapper('create')
+# bottle.read = bottle.make_default_app_wrapper('read')
+# bottle.update = bottle.make_default_app_wrapper('update')
+# bottle.destroy = bottle.make_default_app_wrapper('destroy')
 
 
 if __name__ == '__main__':
