@@ -53,6 +53,7 @@ def create_app(prefix, routes):
 
     for key in routes:
         mod = bottle.load(key)
+        pk = mod.PK_REGEX if 'PK_REGEX' in mod.__dict__ else '[0-9]+'
 
         if 'index' in mod.__dict__:
             mod.app.route('/', 'GET', callback=mod.index)
@@ -61,13 +62,13 @@ def create_app(prefix, routes):
             mod.app.route('/', 'POST', callback=mod.create)
 
         if 'read' in mod.__dict__:
-            mod.app.route('/<pk:re:[0-9]+>', 'GET', callback=mod.read)
+            mod.app.route('/<pk:re:%s>' % pk, 'GET', callback=mod.read)
 
         if 'update' in mod.__dict__:
-            mod.app.route('/<pk:re:[0-9]+>', 'PUT', callback=mod.update)
+            mod.app.route('/<pk:re:%s>' % pk, 'PUT', callback=mod.update)
 
         if 'destroy' in mod.__dict__:
-            mod.app.route('/<pk:re:[0-9]+>', 'DELETE', callback=mod.destroy)
+            mod.app.route('/<pk:re:%s>' % pk, 'DELETE', callback=mod.destroy)
 
         app.mount('/' + key, mod.app)
 
