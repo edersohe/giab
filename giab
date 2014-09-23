@@ -219,30 +219,10 @@ class Bottle(bottle.Bottle):
         prefix = '' if prefix == '/' else prefix
         return self.route(prefix + '/<path:path>', 'GET', **options)
 
-    # def index(self, **options):
-    #     return self.route('/', 'GET', **options)
-    #
-    # def create(self, **options):
-    #     return self.route('/', 'POST', **options)
-    #
-    # def read(self, pk='[0-9]+', **options):
-    #     return self.route('/<pk:re:%s>' % pk, 'GET', **options)
-    #
-    # def update(self, pk='[0-9]+', **options):
-    #     return self.route('/<pk:re:%s>' % pk, 'PUT', **options)
-    #
-    # def destroy(self, pk='[0-9]+', **options):
-    #     return self.route('/<pk:re:%s>' % pk, 'DELETE', **options)
-
 
 bottle.Bottle = Bottle
 bottle.ws = bottle.make_default_app_wrapper('ws')
 bottle.public = bottle.make_default_app_wrapper('public')
-# bottle.index = bottle.make_default_app_wrapper('index')
-# bottle.create = bottle.make_default_app_wrapper('create')
-# bottle.read = bottle.make_default_app_wrapper('read')
-# bottle.update = bottle.make_default_app_wrapper('update')
-# bottle.destroy = bottle.make_default_app_wrapper('destroy')
 
 
 if __name__ == '__main__':
