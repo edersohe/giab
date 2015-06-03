@@ -52,7 +52,7 @@ def create_app(prefix, routes):
     root_prefix = ('', None, '/')
 
     for key in routes:
-        mod = bottle.load(key)
+        mod = bottle.load(key + '.routes')
         pk = mod.PK_REGEX if 'PK_REGEX' in mod.__dict__ else '[0-9]+'
 
         if 'index' in mod.__dict__:
