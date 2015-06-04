@@ -9,10 +9,38 @@ import sys
 import multiprocessing
 import os
 from bottle import template, tob, ERROR_PAGE_TEMPLATE
+import logging as log
+
+try:
+    from pymongo import MongoClient
+except ImportError:
+    MongoClient = None
+    log.warning('pymongo package is not installed')
+
+try:
+    import redis
+except ImportError:
+    redis = None
+    log.warning('redis package is not installed')
 
 
 def get_db_clients(dsns):
-    return dsns
+    dbs = {}
+    for k, v in dsns.iteritems():
+        if v.startswith('mongodb://'):
+            if MongoClient is not None:
+                client = MongoClient(v)
+                dbs[k] = client.get_default_database()
+            else:
+                log.error('pymongo package not installed for uri: %s' % v)
+        elif v.startswith('redis://'):
+            if redis is not None:
+                dbs[k] = redis.Redis.from_url(v)
+            else:
+                log.error('redis package is not installed for uri: %s' % v)
+        else:
+            log.error('Unknow database uri: %s' % v)
+    return dbs
 
 
 def add_status_code(status_codes):
