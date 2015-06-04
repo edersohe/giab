@@ -46,7 +46,7 @@ Genie in a Bottle Framework, it's a set of wrappers and plugins on top of Bottle
 	giab
 
 
-## Core TODO 
+## Core TODO
 
 - [x] Config loader
 - [x] Application loader
@@ -60,7 +60,7 @@ Genie in a Bottle Framework, it's a set of wrappers and plugins on top of Bottle
 ## Plugins TODO
 
 - [ ] Peewee ORM plugin (PostgreSQL, MySQL, SQLite)
-- [ ] MongoDB plugin
-- [ ] Redis plugin
+- [X] MongoDB plugin
+- [X] Redis plugin
 - [ ] Redis Queue plugin
 - [ ] Cassandra plugin
