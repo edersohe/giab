@@ -158,13 +158,18 @@ class JSONPlugin(object):
     api = 2
 
     def __init__(self, ensure_ascii=False, **kwargs):
-
         try:
-            from bson.json_util import dumps
+            import simplejson as json
         except ImportError:
-            from simplejson import dumps
-        except ImportError:
-            from json import dumps
+            import json
+        finally:
+            try:
+                from bson.json_util import _json_convert
+                dumps = lambda obj, *args, **kwargs: json.dumps(
+                    _json_convert(obj), *args, **kwargs
+                )
+            except ImportError:
+                dumps = json.dumps
 
         self.dumps = lambda obj: dumps(obj, ensure_ascii, **kwargs)
 
