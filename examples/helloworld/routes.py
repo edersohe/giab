@@ -24,3 +24,24 @@ def mongo_count():
         return_document=ReturnDocument.AFTER
     )
     return str(doc['count'])
+
+
+@app.ws('/channel')
+def websocket(ws):
+    """
+    var ws = new WebSocket('ws://localhost:8000/helloworld/channel')
+
+    ws.onopen = function (event) {
+      ws.send("Here's some text");
+    };
+
+    ws.onmessage = function (message) {
+      console.log(message);
+    };
+    """
+    while True:
+        msg = ws.receive()
+        if msg is not None:
+            ws.send(msg)
+        else:
+            break
