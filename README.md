@@ -39,12 +39,25 @@ Genie in a Bottle Framework, it's a set of wrappers and plugins on top of Bottle
 	cd $PROJECT_HOME
 	mkdir myapp
 	touch config.py
+	touch run.py
 
+### Add to run.py
+
+	from giab import app, SERVER_OPTS, bottle
+
+	if __name__ == '__main__':
+	    bottle.run(app=app, **SERVER_OPTS)
+
+### Enter to giab app
+
+	cd $PROJECT_HOME/myapp
 
 ### Run giab app
-	cd $PROJECT_HOME/myapp
-	giab
+	python run.py
 
+or
+
+	gunicorn run:app
 
 ## Core TODO
 
