@@ -253,21 +253,17 @@ class Bottle(bottle.Bottle):
 
 class GiabServer(bottle.ServerAdapter):
     def run(self, handler):
-        import gevent
         from gevent.pywsgi import WSGIServer
         from geventwebsocket.handler import WebSocketHandler
         self.options['log'] = None if self.quiet else 'default'
         self.options['handler_class'] = WebSocketHandler
-        spawn = self.options.pop('spawn', [])
         address = (self.host, self.port)
         server = WSGIServer(address, handler, **self.options)
-        spawn.append(server)
         if 'BOTTLE_CHILD' in os.environ:
             import signal
-            for p in spawn:
-                signal.signal(signal.SIGINT, lambda s, f: p.stop())
+            signal.signal(signal.SIGINT, lambda s, f: server.stop())
 
-        gevent.joinall([gevent.spawn(v.serve_forever) for v in spawn])
+        server.serve_forever()
 
 
 bottle.Bottle = Bottle
