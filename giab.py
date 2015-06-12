@@ -275,7 +275,7 @@ bottle.ws = bottle.make_default_app_wrapper('ws')
 bottle.public = bottle.make_default_app_wrapper('public')
 bottle.server_names['giab'] = GiabServer
 
+app = create_app(SERVER_OPTS.pop('prefix'), ROUTES)
 
 if __name__ == '__main__':
-    app = create_app(SERVER_OPTS.pop('prefix'), ROUTES)
     bottle.run(app=app, **SERVER_OPTS)

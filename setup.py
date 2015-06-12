@@ -12,7 +12,7 @@ setup(
                       ' it\'s a set of wrappers and plugins on top of Bottle'
                       ' (Python Web Framework) and easy deploy with'
                       ' gunicorn+gevent'),
-    scripts=['giab'],
+    py_modules=['giab'],
     install_requires=requirements,
     license='MIT',
     url='https://github.com/edersohe/giab'
