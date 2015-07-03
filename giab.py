@@ -7,11 +7,14 @@ import gevent.monkey
 
 gevent.monkey.patch_all()
 
-import bottle
+import urlparse
 import sys
 import os
-from bottle import template, tob, ERROR_PAGE_TEMPLATE
 import logging as log
+
+import bottle
+from bottle import template, tob, ERROR_PAGE_TEMPLATE
+
 
 try:
     from pymongo import MongoClient
@@ -24,6 +27,12 @@ try:
 except ImportError:
     redis = None
     log.warning('redis package is not installed')
+
+try:
+    from cassandra.cluster import Cluster
+except ImportError:
+    connection = None
+    log.warning('cassandra package is not installed')
 
 
 def get_db_clients(dsns):
@@ -40,6 +49,16 @@ def get_db_clients(dsns):
                 dbs[k] = redis.Redis.from_url(v)
             else:
                 log.error('redis package is not installed for uri: %s' % v)
+        elif v.startswith('cassandra://'):
+            if Cluster is not None:
+                p = urlparse.urlparse(v)
+                port = p.port if p.port is not None else 9042
+                keyspace = p.path[1:] if p.path is not None else 'test'
+                dbs[k] = Cluster(
+                    p.hostname.split('--'), port=port, protocol_version=3
+                ).connect(keyspace)
+            else:
+                log.error('cassandra package is not installed for uri: %s' % v)
         else:
             log.error('Unknow database uri: %s' % v)
     return dbs
